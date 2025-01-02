@@ -40,6 +40,7 @@ class TvDatafeed:
         self,
         username: str = None,
         password: str = None,
+        auth_token: str = 'eyJhbGciOiJSUzUxMiIsImtpZCI6IkdaeFUiLCJ0eXAiOiJKV1QifQ.eyJ1c2VyX2lkIjo1NDgwNTUyMSwiZXhwIjoxNzI3ODIxNzk0LCJpYXQiOjE3Mjc4MDczOTQsInBsYW4iOiJwcm9fcHJlbWl1bSIsImV4dF9ob3VycyI6MSwicGVybSI6IiIsInN0dWR5X3Blcm0iOiJQVUI7NmEyZWI4MDUxMjc5NDkxOTk0MDk2MWQ4ZjUxMTYwMzUsUFVCOzQ2NjMzNTU3ZDE5YjQwYjE5MjQzMmVmNmYyOTA4ZDE0LFBVQjtjMDYxOTIzODdlMmU0ZDJkYTdjZDEzNmVlMjgxOTVlNixQVUI7ZGJmZGMzZDNmNDA3NDIyZjkzYjE2NDAyYTFmOGMwMGQsUFVCO2YzM2IxNTAzZjIyMDQxYzViZTVmZTkxMzMxY2NjNDE4LFBVQjtjZTNhZDY5MzI5MjQ0NTQ5OTgwMjE3NmM2YzRiNzkxMSxQVUI7NmM5MWEyOTRiM2ViNGQ5MTg3MWZlNzFjMzYyY2VkNTEsUFVCOzdjNGIwOWIyYjRhNjQ5YTNhNjU0ZjY2ZWZmOTE1NTcwLHR2LWNoYXJ0cGF0dGVybnMsUFVCO2YwOTdhNzhmODM0MjRiNmY4MWMwODQ3ZTVjOTg4Y2M4LFBVQjtlYTA4M2Q5MDUzNjQ0NzZkOWRmN2FjODBhMjVkMjg1YixQVUI7NmZiZWE5YmRmMGNmNGQ2YWJiNmFjOWE4NmI4OGM5MjQsUFVCO2UxZjAwZjZlNWY2NjRkNGJiMzM2ZWE5NGVhYzlmY2FlLFBVQjszMGNiYzY5MWJiOTM0YTI1OTkyOGU3NzYxYzg5YjBmNCxQVUI7YTQ4MWI5YzMzMmEwNDZmNThiODhmYmVhYWY4YWFhOTgsUFVCOzNlODU4YWU2MTNiMjQwMGU4MzAyOTE5ZGQ0MWQzOTU4LFBVQjtjNzNlOWMzZDA0YTU0MWQwOTVkMGQ3MzVhYTdiZjU5MSxQVUI7NWEyMGMzZTY2MTdjNDJjNWFjMmRmYzZlZmYxMzlkZjIsUFVCOzAzNzA2NmMyY2VjZTRjYTk4MzI3ODA0MTIzZWFiMjcyLHR2LXByb3N0dWRpZXMsdHYtY2hhcnRfcGF0dGVybnMsUFVCOzJkZDYyMDBkNmJmNjQ1OTI5MGFiNzJiZDZiODQyMzkxLFBVQjtiM2Y3YzBiY2I0NWQ0MzJjYThkNDc4NDczMGE5YzIyMyx0di12b2x1bWVieXByaWNlLFBVQjszOTVkNjAyYzVlZTI0ODMwYTc1MjZjYWFmN2MyNjI3YyIsIm1heF9zdHVkaWVzIjoyNSwibWF4X2Z1bmRhbWVudGFscyI6MTAsIm1heF9jaGFydHMiOjgsIm1heF9hY3RpdmVfYWxlcnRzIjo0MDAsIm1heF9zdHVkeV9vbl9zdHVkeSI6MjQsImZpZWxkc19wZXJtaXNzaW9ucyI6WyJyZWZib25kcyJdLCJtYXhfb3ZlcmFsbF9hbGVydHMiOjIwMDAsIm1heF9hY3RpdmVfcHJpbWl0aXZlX2FsZXJ0cyI6NDAwLCJtYXhfYWN0aXZlX2NvbXBsZXhfYWxlcnRzIjo0MDAsIm1heF9jb25uZWN0aW9ucyI6NTB9.cAWGPm30ohtUEBNo1ryPxzxSgkzEHR_zjk8jS3cDI-ERQl2iv-Cs6x-ozIA4HQm9pwF607wk-XMl7AGWdBpRxCaTstq8COYg1pzCbPYYQDW3MIXLG_sL96PZDATfb-EXN3O4ZIPSffAv38QKeBHvnRuU7KbqS_GKjRp3pSXrtAc',
     ) -> None:
         """Create TvDatafeed object
 
@@ -50,12 +51,15 @@ class TvDatafeed:
 
         self.ws_debug = False
 
-        self.token = self.__auth(username, password)
+        if auth_token:
+            self.token = auth_token
+        else:
+            self.token = self.__auth(username, password)
 
         if self.token is None:
             self.token = "unauthorized_user_token"
             logger.warning(
-                "you are using nologin method, data you access may be limited"
+                "no login"
             )
 
         self.ws = None
@@ -63,23 +67,28 @@ class TvDatafeed:
         self.chart_session = self.__generate_chart_session()
 
     def __auth(self, username, password):
+        if username is None or password is None:
+            logger.warning("Username or password is None.")
+            return None
 
-        if (username is None or password is None):
-            token = None
+        data = {"username": username, "password": password, "remember": "on"}
 
-        else:
-            data = {"username": username,
-                    "password": password,
-                    "remember": "on"}
-            try:
-                response = requests.post(
-                    url=self.__sign_in_url, data=data, headers=self.__signin_headers)
-                token = response.json()['user']['auth_token']
-            except Exception as e:
-                logger.error('error while signin')
-                token = None
+        try:
+            response = requests.post(url=self.__sign_in_url, data=data, headers=self.__signin_headers)
+            response_data = response.json()
 
-        return token
+            # Check if the response contains the auth_token
+            if 'user' in response_data and 'auth_token' in response_data['user']:
+                token = response_data['user']['auth_token']
+                logger.info("Authorization successful.")
+                return token
+            else:
+                logger.error("Authorization failed. Response: %s", response_data)
+                return None
+
+        except Exception as e:
+            logger.error('Error during sign-in: %s', e)
+            return None
 
     def __create_connection(self):
         logging.debug("creating websocket connection")
@@ -133,26 +142,24 @@ class TvDatafeed:
     @staticmethod
     def __create_df(raw_data, symbol):
         try:
-            out = re.search('"s":\[(.+?)\}\]', raw_data).group(1)
+            out = re.search(r'"s":\[(.+?)\}\]', raw_data).group(1)  # Use raw string
             x = out.split(',{"')
             data = list()
             volume_data = True
 
             for xi in x:
-                xi = re.split("\[|:|,|\]", xi)
+                xi = re.split(r"\[|:|,|\]", xi)  # Use raw string
                 ts = datetime.datetime.fromtimestamp(float(xi[4]))
 
                 row = [ts]
 
                 for i in range(5, 10):
-
-                    # skip converting volume data if does not exists
+                    # skip converting volume data if does not exist
                     if not volume_data and i == 9:
                         row.append(0.0)
                         continue
                     try:
                         row.append(float(xi[i]))
-
                     except ValueError:
                         volume_data = False
                         row.append(0.0)
@@ -161,14 +168,12 @@ class TvDatafeed:
                 data.append(row)
 
             data = pd.DataFrame(
-                data, columns=["datetime", "open",
-                               "high", "low", "close", "volume"]
+                data, columns=["datetime", "open", "high", "low", "close", "volume"]
             ).set_index("datetime")
-            data.insert(0, "symbol", value=symbol)
+            data.insert(0, "Symbol", value=symbol)
             return data
         except AttributeError:
             logger.error("no data, please check the exchange and symbol")
-
     @staticmethod
     def __format_symbol(symbol, exchange, contract: int = None):
 
@@ -307,14 +312,14 @@ class TvDatafeed:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     tv = TvDatafeed()
-    print(tv.get_hist("CRUDEOIL", "MCX", fut_contract=1))
-    print(tv.get_hist("NIFTY", "NSE", fut_contract=1))
+    #print(tv.get_hist("CRUDEOIL", "MCX", fut_contract=1))
+    #print(tv.get_hist("NIFTY", "NSE", fut_contract=1))
     print(
         tv.get_hist(
             "EICHERMOT",
             "NSE",
             interval=Interval.in_1_hour,
-            n_bars=500,
+            n_bars=5,
             extended_session=False,
         )
     )
