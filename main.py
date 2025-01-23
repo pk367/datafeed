@@ -274,6 +274,6 @@ class TvDatafeed:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     tv = TvDatafeed()
-    print(tv.get_hist("CRUDEOIL", "MCX", fut_contract=1))
-    print(tv.get_hist("NIFTY", "NSE", Interval.in_1_hour, 5))
-    print(tv.search_symbol("AAPL", "NASDAQ"))
+    #print(tv.get_hist("CRUDEOIL", "MCX", fut_contract=1))
+    #print(tv.get_hist("NIFTY", "NSE", Interval.in_1_hour, 5))
+    #print(tv.search_symbol("AAPL", "NASDAQ"))
