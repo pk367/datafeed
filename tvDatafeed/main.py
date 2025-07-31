@@ -276,7 +276,7 @@ class TvDatafeed:
             [self.chart_session, "s1", "s1", "symbol_1", interval, n_bars],
         )
         self.__send_message("switch_timezone", [
-                            self.chart_session, "America/New_York"])
+                            self.chart_session, "exchange"])
 
         raw_data = ""
 
